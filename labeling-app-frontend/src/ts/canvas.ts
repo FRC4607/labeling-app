@@ -191,12 +191,12 @@ function removeLastOperation(redraw: boolean = true) {
                 _redrawCanvas();
             }
         }
-    }
-    if (operations[operations.length - 1 ] instanceof DrawBBOperation) {
-        enableNext();
-    }
-    else {
-        disableNext();
+        if (operations[operations.length - 1 ] instanceof DrawBBOperation) {
+            enableNext();
+        }
+        else {
+            disableNext();
+        }
     }
 }
 

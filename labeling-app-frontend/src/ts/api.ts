@@ -10,6 +10,8 @@ class LabelSubmission {
     }
 }
 
+var currentImgId: string;
+
 function computeYOLOBB(box: DrawBBOperation): number[] {
     const x = (box.x1 + box.x2) / 2;
     const y = (box.y1 + box.y2) / 2;
@@ -18,7 +20,13 @@ function computeYOLOBB(box: DrawBBOperation): number[] {
     return [x, y, w, h];
 }
 
-function sendServerPost() {
+async function getJob() {
+    // TODO: Add the actual API endpoint
+    currentImgId = "yett";
+    const b = await fetch("/yett.jpg");
+}
+
+async function sendServerPost() {
     const labels: number[][][] = new Array<number[][]>();
     labels[0] = new Array<number[]>();
     labels[1] = new Array<number[]>();
@@ -26,6 +34,6 @@ function sendServerPost() {
     getBoundingBoxes().forEach(e => {
         labels[e.labelId].push(computeYOLOBB(e))
     });
-    console.log(labels);
+    console.log(JSON.stringify(labels));
 }
 export {sendServerPost}
