@@ -18,6 +18,12 @@ const op1 = new SetImageOperation(
     await the.blob()
 );
 
+clearCanvas();
+setImage(op1).then(() => {
+    nextState();
+    enableNext();
+});
+
 $(window).on("resize", async () => {
     // const canvas: HTMLCanvasElement = document.getElementById("img_canvas") as HTMLCanvasElement;
     // const ctx: CanvasRenderingContext2D  = canvas.getContext("2d")!;
@@ -28,10 +34,3 @@ $(window).on("resize", async () => {
     setCanvasSize(parentWidth, parentWidth * (2160 / 3840));
 });
 $(window).trigger("resize");
-
-clearCanvas();
-setImage(op1).then(() => {
-    nextState();
-});
-
-enableNext();

@@ -1,3 +1,4 @@
+import { getPrimaryColor, getSecondaryColor } from "./colors";
 import { disableNext, enableNext } from "./events";
 import { getState } from "./state";
 
@@ -157,7 +158,9 @@ function drawBB(box: DrawBBOperation, addOp: boolean = true) {
 
 async function _redrawCanvas() {
     clearCanvas();
-    await setImage(operations[0] as SetImageOperation, false);
+    if (operations[0]) {
+        await setImage(operations[0] as SetImageOperation, false);
+    }
     operations.forEach(op => {
         if (op instanceof SetImageOperation) {
             
@@ -174,8 +177,15 @@ async function _redrawCanvas() {
 function removeLastOperation(redraw: boolean = true) {
     if (placementEnabled) {
         if(operations.length > 1) {
-            if (operations.pop() instanceof DrawBBOperation) {
-                removeLastOperation(false)
+            const op = operations.pop();
+            if (op instanceof DrawBBOperation) {
+                if (op.labelId == getState()) {
+                    removeLastOperation(false);
+                }
+                else {
+                    operations.push(op);
+                    return;
+                }
             }
             if (redraw) {
                 _redrawCanvas();
@@ -216,8 +226,8 @@ function _calcECRect(ops: Operation[]): DrawBBOperation {
         y1,
         x2,
         y2,
-        "rgba(255, 0, 0, 1)",
-        "rgba(255, 0, 0, 0.25)"
+        getPrimaryColor(),
+        getSecondaryColor()
     )
 }
 
@@ -226,8 +236,13 @@ function enablePlacement() {
 }
 
 function disablePlacement() {
-    console.log(placementEnabled);
     placementEnabled = false;
 }
 
-export {clearCanvas, setImage, placePoint, setCanvasSize, drawBB, removeLastOperation, getCanvasWidth, getCanvasHeight, SetImageOperation, PlacePointOperation, DrawBBOperation, enablePlacement, disablePlacement};
+function getBoundingBoxes(): DrawBBOperation[] {
+    return (operations.filter(e => {
+        return e instanceof DrawBBOperation;
+    }) as DrawBBOperation[]);
+}
+
+export {clearCanvas, setImage, placePoint, setCanvasSize, drawBB, removeLastOperation, getCanvasWidth, getCanvasHeight, SetImageOperation, PlacePointOperation, DrawBBOperation, enablePlacement, disablePlacement, getBoundingBoxes};

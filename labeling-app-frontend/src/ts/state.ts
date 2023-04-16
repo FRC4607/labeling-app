@@ -1,3 +1,4 @@
+import { sendServerPost } from "./api";
 import { disablePlacement, enablePlacement } from "./canvas";
 import { setCube, setTippedCone, setUprightCone, setWaitingForm, setWaitingImg } from "./direction_text";
 import { disableNext } from "./events";
@@ -38,6 +39,7 @@ function nextState() {
             state = ProgramState.SUBMIT_FORM;
             setWaitingForm();
             disablePlacement();
+            sendServerPost();
             break;
         case ProgramState.SUBMIT_FORM:
             state = ProgramState.LOADING_IMG;
