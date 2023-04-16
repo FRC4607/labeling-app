@@ -10,6 +10,8 @@ import $ from 'jquery';
 
 import { clearCanvas, setImage, SetImageOperation, setCanvasSize } from './canvas';
 import "./events";
+import { nextState } from './state';
+import { enableNext } from './events';
 
 const the = await fetch("/yett.jpg");
 const op1 = new SetImageOperation(
@@ -28,4 +30,8 @@ $(window).on("resize", async () => {
 $(window).trigger("resize");
 
 clearCanvas();
-await setImage(op1);
+setImage(op1).then(() => {
+    nextState();
+});
+
+enableNext();

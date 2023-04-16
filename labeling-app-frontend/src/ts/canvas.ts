@@ -1,5 +1,11 @@
+import { disableNext, enableNext } from "./events";
+import { getState } from "./state";
+
 const canvasElement: HTMLCanvasElement = document.getElementById("img_canvas")! as HTMLCanvasElement;
 const ctx: CanvasRenderingContext2D = canvasElement.getContext("2d")!;
+
+// do not change to let, it doesn't work
+var placementEnabled: boolean = false;
 
 interface Operation {
 }
@@ -27,6 +33,8 @@ class PlacePointOperation implements Operation {
 }
 
 class DrawBBOperation implements Operation {
+    labelId: 0 | 1 | 2;
+
     x1: number;
     y1: number;
     x2: number;
@@ -34,7 +42,8 @@ class DrawBBOperation implements Operation {
     outerStyle: string
     innerStyle: string
 
-    constructor(x1: number, y1: number, x2: number, y2: number, outerStyle: string, innerStyle: string) {
+    constructor(labelId: 0 | 1 | 2, x1: number, y1: number, x2: number, y2: number, outerStyle: string, innerStyle: string) {
+        this.labelId = labelId;
         this.x1 = x1;
         this.y1 = y1;
         this.x2 = x2;
@@ -76,67 +85,73 @@ async function setImage(img: SetImageOperation, addOp: boolean = true) {
 }
 
 function placePoint(point: PlacePointOperation, addOp: boolean = true) {
-    // Calculate the radius relative to canvas width, round
-    const relRadius = +(ctx.canvas.width * 0.005);
-    // Backups
-    const s = ctx.strokeStyle;
-    const f = ctx.strokeStyle;
-    const l = ctx.lineWidth;
-    // Draw the outer circle
-    ctx.strokeStyle = point.outerStyle;
-    ctx.lineWidth = +(relRadius * 0.125)
-    ctx.beginPath();
-    ctx.ellipse(_scaleRelativeX(point.x), _scaleRelativeY(point.y), relRadius, relRadius, 0, 0, 2 * Math.PI);
-    ctx.stroke();
-    // Draw the inner circle
-    ctx.fillStyle = point.innerStyle;
-    ctx.beginPath();
-    const offsetRadius = relRadius - +(ctx.lineWidth / 2);
-    ctx.ellipse(_scaleRelativeX(point.x), _scaleRelativeY(point.y), offsetRadius, offsetRadius, 0, 0, 2 * Math.PI);
-    ctx.fill();
-    // Restore
-    ctx.strokeStyle = s;
-    ctx.fillStyle = f;
-    ctx.lineWidth = l;
-    if (addOp) {
-        operations.push(point);
-        // See if we need to draw a bounding box
-        if (operations.length >= 5
-            && operations[operations.length - 2] instanceof PlacePointOperation
-            && operations[operations.length - 3] instanceof PlacePointOperation
-            && operations[operations.length - 4] instanceof PlacePointOperation
-        ) {
-            drawBB(_calcECRect(operations.slice(operations.length - 4)));
+    if (placementEnabled) {
+        // Calculate the radius relative to canvas width, round
+        const relRadius = +(ctx.canvas.width * 0.005);
+        // Backups
+        const s = ctx.strokeStyle;
+        const f = ctx.strokeStyle;
+        const l = ctx.lineWidth;
+        // Draw the outer circle
+        ctx.strokeStyle = point.outerStyle;
+        ctx.lineWidth = +(relRadius * 0.125)
+        ctx.beginPath();
+        ctx.ellipse(_scaleRelativeX(point.x), _scaleRelativeY(point.y), relRadius, relRadius, 0, 0, 2 * Math.PI);
+        ctx.stroke();
+        // Draw the inner circle
+        ctx.fillStyle = point.innerStyle;
+        ctx.beginPath();
+        const offsetRadius = relRadius - +(ctx.lineWidth / 2);
+        ctx.ellipse(_scaleRelativeX(point.x), _scaleRelativeY(point.y), offsetRadius, offsetRadius, 0, 0, 2 * Math.PI);
+        ctx.fill();
+        // Restore
+        ctx.strokeStyle = s;
+        ctx.fillStyle = f;
+        ctx.lineWidth = l;
+        if (addOp) {
+            operations.push(point);
+            disableNext();
+            // See if we need to draw a bounding box
+            if (operations.length >= 5
+                && operations[operations.length - 2] instanceof PlacePointOperation
+                && operations[operations.length - 3] instanceof PlacePointOperation
+                && operations[operations.length - 4] instanceof PlacePointOperation
+            ) {
+                drawBB(_calcECRect(operations.slice(operations.length - 4)));
+            }
         }
     }
 }
 
 function drawBB(box: DrawBBOperation, addOp: boolean = true) {
-    const relThickness = +(ctx.canvas.width * 0.005);
-    // Backups
-    const s = ctx.strokeStyle;
-    const f = ctx.strokeStyle;
-    const l = ctx.lineWidth;
-    // Draw the outer box
-    ctx.strokeStyle = box.outerStyle;
-    ctx.lineWidth = +(relThickness * 0.125);
-    const w = _scaleRelativeX(box.x2 - box.x1);
-    const h = _scaleRelativeY(box.y2 - box.y1);
-    ctx.beginPath();
-    ctx.rect(_scaleRelativeX(box.x1), _scaleRelativeY(box.y1), w, h)
-    ctx.stroke();
-    // Draw the inner circle
-    ctx.fillStyle = box.innerStyle;
-    ctx.beginPath();
-    const offsetThickness = +(ctx.lineWidth / 2);
-    ctx.rect(_scaleRelativeX(box.x1) + offsetThickness, _scaleRelativeY(box.y1) + offsetThickness, w - offsetThickness, h - offsetThickness);
-    ctx.fill();
-    // Restore
-    ctx.strokeStyle = s;
-    ctx.fillStyle = f;
-    ctx.lineWidth = l;
-    if (addOp) {
-        operations.push(box);
+    if (placementEnabled) {
+        const relThickness = +(ctx.canvas.width * 0.005);
+        // Backups
+        const s = ctx.strokeStyle;
+        const f = ctx.strokeStyle;
+        const l = ctx.lineWidth;
+        // Draw the outer box
+        ctx.strokeStyle = box.outerStyle;
+        ctx.lineWidth = +(relThickness * 0.125);
+        const w = _scaleRelativeX(box.x2 - box.x1);
+        const h = _scaleRelativeY(box.y2 - box.y1);
+        ctx.beginPath();
+        ctx.rect(_scaleRelativeX(box.x1), _scaleRelativeY(box.y1), w, h)
+        ctx.stroke();
+        // Draw the inner circle
+        ctx.fillStyle = box.innerStyle;
+        ctx.beginPath();
+        const offsetThickness = +(ctx.lineWidth / 2);
+        ctx.rect(_scaleRelativeX(box.x1) + offsetThickness, _scaleRelativeY(box.y1) + offsetThickness, w - offsetThickness, h - offsetThickness);
+        ctx.fill();
+        // Restore
+        ctx.strokeStyle = s;
+        ctx.fillStyle = f;
+        ctx.lineWidth = l;
+        if (addOp) {
+            operations.push(box);
+            enableNext();
+        }
     }
 }
 
@@ -157,13 +172,21 @@ async function _redrawCanvas() {
 }
 
 function removeLastOperation(redraw: boolean = true) {
-    if(operations.length > 1) {
-        if (operations.pop() instanceof DrawBBOperation) {
-            removeLastOperation(false)
+    if (placementEnabled) {
+        if(operations.length > 1) {
+            if (operations.pop() instanceof DrawBBOperation) {
+                removeLastOperation(false)
+            }
+            if (redraw) {
+                _redrawCanvas();
+            }
         }
-        if (redraw) {
-            _redrawCanvas();
-        }
+    }
+    if (operations[operations.length - 1 ] instanceof DrawBBOperation) {
+        enableNext();
+    }
+    else {
+        disableNext();
     }
 }
 
@@ -188,6 +211,7 @@ function _calcECRect(ops: Operation[]): DrawBBOperation {
         y2 = Math.max(y2, cOp.y);
     });
     return new DrawBBOperation(
+        getState() as (0 | 1 | 2),
         x1,
         y1,
         x2,
@@ -197,4 +221,13 @@ function _calcECRect(ops: Operation[]): DrawBBOperation {
     )
 }
 
-export {clearCanvas, setImage, placePoint, setCanvasSize, drawBB, removeLastOperation, getCanvasWidth, getCanvasHeight, SetImageOperation, PlacePointOperation, DrawBBOperation};
+function enablePlacement() {
+    placementEnabled = true;
+}
+
+function disablePlacement() {
+    console.log(placementEnabled);
+    placementEnabled = false;
+}
+
+export {clearCanvas, setImage, placePoint, setCanvasSize, drawBB, removeLastOperation, getCanvasWidth, getCanvasHeight, SetImageOperation, PlacePointOperation, DrawBBOperation, enablePlacement, disablePlacement};
