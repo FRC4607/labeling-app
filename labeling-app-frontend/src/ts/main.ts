@@ -1,28 +1,15 @@
 // Import our custom CSS
 import '../scss/styles.scss';
 
-// Import all of Bootstrap's JS
-import * as bootstrap from 'bootstrap';
-bootstrap;
-
 // jQuery
 import $ from 'jquery';
 
-import { clearCanvas, setImage, SetImageOperation, setCanvasSize } from './canvas';
-import "./events";
-import { nextState } from './state';
-import { enableNext } from './events';
+import { setCanvasSize, disablePlacement } from './canvas';
+import { getJob } from './api';
+import { disableNext } from './events';
 
-const the = await fetch("/yett.jpg");
-const op1 = new SetImageOperation(
-    await the.blob()
-);
-
-clearCanvas();
-setImage(op1).then(() => {
-    nextState();
-    enableNext();
-});
+disablePlacement();
+disableNext();
 
 $(window).on("resize", async () => {
     // const canvas: HTMLCanvasElement = document.getElementById("img_canvas") as HTMLCanvasElement;
@@ -34,3 +21,5 @@ $(window).on("resize", async () => {
     setCanvasSize(parentWidth, parentWidth * (2160 / 3840));
 });
 $(window).trigger("resize");
+
+getJob();

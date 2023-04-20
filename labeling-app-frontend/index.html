@@ -11,7 +11,7 @@
         <div class="container-fluid">
           <span class="navbar-brand h1">Labeling App</span>
           <form class="justify-content-start row">
-            <input type="name" class="form-control col m-1" placeholder="Name">
+            <input type="name" class="form-control col m-1" placeholder="Name" id="name-box">
             <button class="btn btn-secondary col m-1" type="button" id="undo-btn">Undo</button>
             <button disabled class="btn btn-success col m-1" type="button" id="progress-btn">Next</button>
           </form>
@@ -27,6 +27,9 @@
               Image not loaded yet...
             </canvas>
           </div>
+        </div>
+        <div class="row">
+          <p>Click on the most extreme points of the object to draw a box around it (topmost, bottommost, leftmost, rightmost). Enter moves to the next scren. Ctrl-Z to undo.</p>
         </div>
       </div>
     </div>

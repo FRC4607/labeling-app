@@ -1,0 +1,10 @@
+labeling-app-backend/__pycache__
+labeling-app-backend/.venv
+labeling-app-backend/imgs/*
+labeling-app-backend/labels/*
+labeling-app-backend/.gitignore
+labeling-app-backend/db.sqlite3
+labeling-app-frontend/dist
+labeling-app-frontend/node_modules
+labeling-app-frontend/public
+labeling-app-frontend/.gitignore

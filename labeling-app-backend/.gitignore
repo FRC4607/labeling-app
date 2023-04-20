@@ -1,0 +1,5 @@
+.venv
+__pycache__
+imgs/*
+labels/*
+db.sqlite3

@@ -1,7 +1,7 @@
-import { sendServerPost } from "./api";
+import { getJob, sendServerPost } from "./api";
 import { disablePlacement, enablePlacement } from "./canvas";
 import { setCube, setTippedCone, setUprightCone, setWaitingForm, setWaitingImg } from "./direction_text";
-import { disableNext } from "./events";
+import { disableNext, enableNext } from "./events";
 
 enum ProgramState {
     CUBES,
@@ -20,12 +20,12 @@ function getState(): ProgramState {
 }
 
 function nextState() {
-    disableNext();
     switch (state) {
         case ProgramState.LOADING_IMG:
             state = ProgramState.CUBES;
             setCube();
             enablePlacement();
+            enableNext();
             break;
         case ProgramState.CUBES:
             state = ProgramState.UPRIGHT_CONES;
@@ -39,11 +39,13 @@ function nextState() {
             state = ProgramState.SUBMIT_FORM;
             setWaitingForm();
             disablePlacement();
+            disableNext();
             sendServerPost();
             break;
         case ProgramState.SUBMIT_FORM:
             state = ProgramState.LOADING_IMG;
             setWaitingImg();
+            getJob();
             break;
     }
 }

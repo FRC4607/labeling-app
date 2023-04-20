@@ -191,7 +191,7 @@ function removeLastOperation(redraw: boolean = true) {
                 _redrawCanvas();
             }
         }
-        if (operations[operations.length - 1 ] instanceof DrawBBOperation) {
+        if ((operations[operations.length - 1] instanceof DrawBBOperation) || (operations[operations.length - 1] instanceof SetImageOperation)) {
             enableNext();
         }
         else {
@@ -209,6 +209,9 @@ function getCanvasHeight() {
 }
 
 function _calcECRect(ops: Operation[]): DrawBBOperation {
+    /* This code is based on an idea expressed in a paper by D. P. Papadopoulos, J. R. R. Uijlings, F. Keller, and V. Ferrari called ‘Extreme clicking for efficient object annotation’.
+        It can be found on arXiv at https://arxiv.org/abs/1708.02750
+        Accessed 4/16/23 */
     let x1 = Infinity;
     let y1 = Infinity;
     let x2 = 0;
@@ -220,6 +223,7 @@ function _calcECRect(ops: Operation[]): DrawBBOperation {
         y1 = Math.min(y1, cOp.y);
         y2 = Math.max(y2, cOp.y);
     });
+    
     return new DrawBBOperation(
         getState() as (0 | 1 | 2),
         x1,
@@ -245,4 +249,8 @@ function getBoundingBoxes(): DrawBBOperation[] {
     }) as DrawBBOperation[]);
 }
 
-export {clearCanvas, setImage, placePoint, setCanvasSize, drawBB, removeLastOperation, getCanvasWidth, getCanvasHeight, SetImageOperation, PlacePointOperation, DrawBBOperation, enablePlacement, disablePlacement, getBoundingBoxes};
+function clearOps() {
+    operations = [];
+}
+
+export {clearCanvas, setImage, placePoint, setCanvasSize, drawBB, removeLastOperation, getCanvasWidth, getCanvasHeight, SetImageOperation, PlacePointOperation, DrawBBOperation, enablePlacement, disablePlacement, getBoundingBoxes, clearOps};

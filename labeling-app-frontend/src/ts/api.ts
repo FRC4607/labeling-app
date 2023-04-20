@@ -1,13 +1,23 @@
-import { DrawBBOperation, getBoundingBoxes } from "./canvas";
+import { clearCanvas, clearOps, DrawBBOperation, getBoundingBoxes, setImage, SetImageOperation } from "./canvas";
+import { nextState } from "./state";
+
+import $ from "jquery";
 
 class LabelSubmission {
     imgId: string;
     labels: number[][][];
+    submitter: string;
 
-    constructor(imgId: string, labels: number[][][]) {
+    constructor(imgId: string, labels: number[][][], submitter: string) {
         this.imgId = imgId;
         this.labels = labels;
+        this.submitter = submitter;
     }
+}
+
+interface TaskResponse {
+    imgId: string;
+    data: string;
 }
 
 var currentImgId: string;
@@ -22,8 +32,13 @@ function computeYOLOBB(box: DrawBBOperation): number[] {
 
 async function getJob() {
     // TODO: Add the actual API endpoint
-    currentImgId = "yett";
-    const b = await fetch("/yett.jpg");
+    const b: TaskResponse = await (await fetch("/api/getTask")).json()
+    currentImgId = b.imgId;
+    const op = new SetImageOperation(await (await fetch(b.data)).blob());
+    clearOps();
+    clearCanvas();
+    setImage(op);
+    nextState();
 }
 
 async function sendServerPost() {
@@ -34,6 +49,13 @@ async function sendServerPost() {
     getBoundingBoxes().forEach(e => {
         labels[e.labelId].push(computeYOLOBB(e))
     });
-    console.log(JSON.stringify(labels));
+    const data = new LabelSubmission(currentImgId, labels, $("#name-box").val() as string);
+    // TODO: Add thhe actual API endpoint
+    await fetch("/api/submitLabels", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+    })
+    nextState();
 }
-export {sendServerPost}
+export {getJob, sendServerPost}
