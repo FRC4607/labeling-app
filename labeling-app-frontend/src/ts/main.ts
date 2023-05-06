@@ -17,8 +17,8 @@ $(window).on("resize", async () => {
     // ctx.canvas.height.
     const parentWidth = $("#img_canvas").parent().width()!;
     $("#img_canvas").width(parentWidth);
-    $("#img_canvas").height(parentWidth * (2160 / 3840));
-    setCanvasSize(parentWidth, parentWidth * (2160 / 3840));
+    $("#img_canvas").height(parentWidth);
+    setCanvasSize(parentWidth, parentWidth);
 });
 $(window).trigger("resize");
 
